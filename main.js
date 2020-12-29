@@ -13,10 +13,33 @@ var langTalkNums = {};
 var totalTime = 0;
 var times = {};
 
+var MAIN_CHANNELS = ['rc1', 'rc2'];
+var coverage = {
+	main: {
+		total: 0,
+		EN_DE: 0,
+		other: 0
+	},
+	other: {
+		total: 0,
+		EN_DE: 0,
+		other: 0
+	}
+}
+
 function minsAsHours(mins) {
 	var m = '0' + (mins % 60);
 	m = m.substr(m.length - 2);
 	return Math.floor(mins / 60) + ':' + m;
+}
+
+function ENDEcovered(talk) {
+	if (talk.language == 'de')
+		return Object.keys(talk.translators).includes('en');
+	else if (talk.language == 'en')
+		return Object.keys(talk.translators).includes('de');
+	else
+		return true;
 }
 
 var files = fs.readdirSync(opts.dataDir);
@@ -28,7 +51,12 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 	fs.readFile(filePath, function (err, data) {
 		var dayTalks = parse(data);
 		dayTalks.forEach(function (talk) {
+			var otherLang = false
 			Object.entries(talk.translators).forEach(function (language) {
+
+				if (language[0] != 'en' && language[0] != 'de')
+					otherLang = true;
+
 				totalTime += talk.duration;
 
 				if (langTalkNums.hasOwnProperty(language[0]))
@@ -40,6 +68,19 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 					times[translator] = (times[translator] || 0) + talk.duration;
 				});
 			});
+			if (MAIN_CHANNELS.includes(talk.location.toLowerCase())) {
+				coverage.main.total++;
+				if (ENDEcovered(talk))
+					coverage.main.EN_DE++;
+				if (otherLang)
+					coverage.main.other++;
+			} else {
+				coverage.other.total++;
+				if (ENDEcovered(talk))
+					coverage.other.EN_DE++;
+				if (otherLang)
+					coverage.main.other++;
+			}
 		});
 		talks = talks.concat(dayTalks);
 		done();
@@ -52,6 +93,13 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 
 	console.log('\nTOTAL TRANSLATED TALKS:');
 	console.log(talks.length);
+
+	console.log('\nEN <> DE COVERAGE:');
+	console.log(coverage);
+	console.log('Main channels EN<>DE: ' + Math.floor(100 * coverage.main.EN_DE/coverage.main.total) + '%');
+	console.log('Other channels EN<>DE: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
+	console.log('Main channels other Lang: ' + Math.floor(100 * coverage.main.other/coverage.main.total) + '%');
+	console.log('Other channels other Lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
 
 	console.log('\nLANGUAGES:');
 	console.log(langTalkNums);
