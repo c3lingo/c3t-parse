@@ -10,12 +10,12 @@ Usage:
 
 (Requires `httpie` installed)
 ```bash
-./download <event prefix> [<number of days (default 4)>]
+./download.sh <event prefix> [<number of days (default 4)>]
 ```
 
 E.g. if the pads are named `rc3-day1` through `rc3-day3`, use:
 ```bash
-./download rc3 3
+./download.sh rc3 3
 ```
 
 ## Step 2 (optional): Set "main" halls
