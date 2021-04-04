@@ -13,7 +13,7 @@ var langTalkNums = {};
 var totalTime = 0;
 var times = {};
 
-var MAIN_CHANNELS = ['rc1', 'rc2'];
+var MAIN_CHANNELS = [];
 var coverage = {
 	main: {
 		total: 0,
