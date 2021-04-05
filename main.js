@@ -10,7 +10,8 @@ var opts = {
 
 var talks = [];
 var langTalkNums = {};
-var totalTime = 0;
+var totalTalkTime = 0;
+var totalTranslatorTime = 0;
 var times = {};
 
 var MAIN_CHANNELS = [];
@@ -57,7 +58,7 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 				if (language[0] != 'en' && language[0] != 'de')
 					otherLang = true;
 
-				totalTime += talk.duration;
+				totalTalkTime += talk.duration;
 
 				if (langTalkNums.hasOwnProperty(language[0]))
 					langTalkNums[language[0]] += 1
@@ -91,29 +92,35 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 	}).sortBy('time').reverse()
 	.value();
 
-	console.log('\nTOTAL TRANSLATED TALKS:');
+	console.log('\nTotal translated talks:');
 	console.log(talks.length);
 
-	console.log('\nEN <> DE COVERAGE:');
+	console.log('\nen↔de coverage:');
 	console.log(coverage);
-	console.log('Main channels EN<>DE: ' + Math.floor(100 * coverage.main.EN_DE/coverage.main.total) + '%');
-	console.log('Other channels EN<>DE: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
-	console.log('Main channels other Lang: ' + Math.floor(100 * coverage.main.other/coverage.main.total) + '%');
-	console.log('Other channels other Lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
+	console.log('Main channels en↔de: ' + Math.floor(100 * coverage.main.EN_DE/coverage.main.total) + '%');
+	console.log('Other channels en↔de: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
+	console.log('Main channels other lang: ' + Math.floor(100 * coverage.main.other/coverage.main.total) + '%');
+	console.log('Other channels other lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
 
-	console.log('\nLANGUAGES:');
+	console.log('\nLanguages:');
 	console.log(langTalkNums);
 
-	console.log('\nTRANSLATORS: (' + translators.length + ')');
+	console.log('\nTranslators: (' + translators.length + ')');
 	translators.forEach(function (t) {
-		var s = ' '.repeat(24 - t.name.length);
-		console.log('- ' + t.name + ':' + s + minsAsHours(t.time));
+		var hours = minsAsHours(t.time);
+		var s1 = ' '.repeat(24 - t.name.length);
+		var s2 = ' '.repeat(6 - hours.length);
+		console.log('- ' + t.name + ':' + s1 + s2 + hours);
+		totalTranslatorTime += t.time;
 	});
 
-	console.log('\nTOTAL TRANSLATED HOURS:');
-	console.log(minsAsHours(totalTime));
+	console.log('\nTotal translated hours:');
+	console.log(minsAsHours(totalTalkTime));
 
-	console.log('\nAVG HOURS TRANSLATED P.P.:');
-	console.log(minsAsHours(Math.floor(totalTime / translators.length)));
+	console.log('\nTotal translation shifts:');
+	console.log(minsAsHours(totalTranslatorTime));
+
+	console.log('\nAverage shift time per translator:');
+	console.log(minsAsHours(Math.floor(totalTranslatorTime / translators.length)));
 
 });
