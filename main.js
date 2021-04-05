@@ -11,7 +11,7 @@ var opts = {
 var talks = [];
 var langTalkNums = {};
 var totalTalkTime = 0;
-var totalTranslatorTime = 0;
+var totalInterpreterTime = 0;
 var times = {};
 
 var MAIN_CHANNELS = [];
@@ -26,7 +26,7 @@ var coverage = {
 		EN_DE: 0,
 		other: 0
 	}
-}
+};
 
 function minsAsHours(mins) {
 	var m = '0' + (mins % 60);
@@ -35,12 +35,14 @@ function minsAsHours(mins) {
 }
 
 function ENDEcovered(talk) {
-	if (talk.language == 'de')
-		return Object.keys(talk.translators).includes('en');
-	else if (talk.language == 'en')
-		return Object.keys(talk.translators).includes('de');
-	else
+	if (talk.language == 'de') {
+		return Object.keys(talk.interpreters).includes('en');
+	}
+	else if (talk.language == 'en') {
+		return Object.keys(talk.interpreters).includes('de');
+	} else {
 		return true;
+	}
 }
 
 var files = fs.readdirSync(opts.dataDir);
@@ -48,51 +50,59 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 	var filePath = path.resolve(opts.dataDir, filename);
 	// The proper way would be to pipe this through a parser, but with less than
 	// 10 KB per file we may as well pick the quick and dirty way
-	console.log(filePath)
+	console.log(filePath);
 	fs.readFile(filePath, function (err, data) {
 		var dayTalks = parse(data);
 		dayTalks.forEach(function (talk) {
-			var otherLang = false
-			Object.entries(talk.translators).forEach(function (language) {
+			var otherLang = false;
+			Object.entries(talk.interpreters).forEach(function (language) {
 
-				if (language[0] != 'en' && language[0] != 'de')
+				if (language[0] != 'en' && language[0] != 'de') {
 					otherLang = true;
+				}
 
 				totalTalkTime += talk.duration;
 
-				if (langTalkNums.hasOwnProperty(language[0]))
-					langTalkNums[language[0]] += 1
-				else
-					langTalkNums[language[0]] = 1
+				if (langTalkNums.hasOwnProperty(language[0])) {
+					langTalkNums[language[0]] += 1;
+				} else {
+					langTalkNums[language[0]] = 1;
+				}
 
-				language[1].forEach(function (translator) {
-					times[translator] = (times[translator] || 0) + talk.duration;
+				language[1].forEach(function (interpreter) {
+					times[interpreter] = (times[interpreter] || 0) + talk.duration;
 				});
 			});
 			if (MAIN_CHANNELS.includes(talk.location.toLowerCase())) {
 				coverage.main.total++;
-				if (ENDEcovered(talk))
+				if (ENDEcovered(talk)) {
 					coverage.main.EN_DE++;
-				if (otherLang)
+				}
+				if (otherLang) {
 					coverage.main.other++;
+				}
 			} else {
 				coverage.other.total++;
-				if (ENDEcovered(talk))
+				if (ENDEcovered(talk)) {
 					coverage.other.EN_DE++;
-				if (otherLang)
+				}
+				if (otherLang) {
 					coverage.main.other++;
+				}
 			}
 		});
 		talks = talks.concat(dayTalks);
 		done();
 	});
 }, function done () {
-	var translators = __(times).map(function (time, name) {
+	var interpreters = __(times).map(function (time, name) {
 		return { name: name, time: time };
-	}).sortBy('time').reverse()
+	})
+	.sortBy('time')
+	.reverse()
 	.value();
 
-	console.log('\nTotal translated talks:');
+	console.log('\nTotal interpreted talks:');
 	console.log(talks.length);
 
 	console.log('\nen↔de coverage:');
@@ -105,22 +115,22 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 	console.log('\nLanguages:');
 	console.log(langTalkNums);
 
-	console.log('\nTranslators: (' + translators.length + ')');
-	translators.forEach(function (t) {
+	console.log('\nInterpreters: (' + interpreters.length + ')');
+	interpreters.forEach(function (t) {
 		var hours = minsAsHours(t.time);
 		var s1 = ' '.repeat(24 - t.name.length);
 		var s2 = ' '.repeat(6 - hours.length);
 		console.log('- ' + t.name + ':' + s1 + s2 + hours);
-		totalTranslatorTime += t.time;
+		totalInterpreterTime += t.time;
 	});
 
-	console.log('\nTotal translated hours:');
+	console.log('\nTotal interpreted hours:');
 	console.log(minsAsHours(totalTalkTime));
 
-	console.log('\nTotal translation shifts:');
-	console.log(minsAsHours(totalTranslatorTime));
+	console.log('\nTotal interpretation shifts:');
+	console.log(minsAsHours(totalInterpreterTime));
 
-	console.log('\nAverage shift time per translator:');
-	console.log(minsAsHours(Math.floor(totalTranslatorTime / translators.length)));
+	console.log('\nAverage shift time per interpreter:');
+	console.log(minsAsHours(Math.floor(totalInterpreterTime / interpreters.length)));
 
 });
