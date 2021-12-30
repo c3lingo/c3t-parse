@@ -48,6 +48,9 @@ function ENDEcovered(talk) {
 var files = fs.readdirSync(opts.dataDir);
 async.eachLimit(files, 5, function iterator (filename, done) {
 	var filePath = path.resolve(opts.dataDir, filename);
+	if (!fs.statSync(filePath).isFile()) {
+		return;
+	}
 	// The proper way would be to pipe this through a parser, but with less than
 	// 10 KB per file we may as well pick the quick and dirty way
 	console.log(filePath);
