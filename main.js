@@ -110,10 +110,15 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 
 	console.log('\nen↔de coverage:');
 	console.log(coverage);
-	console.log('Main channels en↔de: ' + Math.floor(100 * coverage.main.EN_DE/coverage.main.total) + '%');
-	console.log('Other channels en↔de: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
-	console.log('Main channels other lang: ' + Math.floor(100 * coverage.main.other/coverage.main.total) + '%');
-	console.log('Other channels other lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
+	if (MAIN_CHANNELS && MAIN_CHANNELS.length) {
+		console.log('Main channels en↔de: ' + Math.floor(100 * coverage.main.EN_DE/coverage.main.total) + '%');
+		console.log('Other channels en↔de: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
+		console.log('Main channels other lang: ' + Math.floor(100 * coverage.main.other/coverage.main.total) + '%');
+		console.log('Other channels other lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
+	} else {
+		console.log('en↔de: ' + Math.floor(100 * coverage.other.EN_DE/coverage.other.total) + '%');
+		console.log('other lang: ' + Math.floor(100 * coverage.other.other/coverage.other.total) + '%');
+	}
 
 	console.log('\nLanguages:');
 	console.log(langTalkNums);
