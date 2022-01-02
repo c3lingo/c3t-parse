@@ -49,6 +49,7 @@ var files = fs.readdirSync(opts.dataDir);
 async.eachLimit(files, 5, function iterator (filename, done) {
 	var filePath = path.resolve(opts.dataDir, filename);
 	if (!fs.statSync(filePath).isFile()) {
+		done();
 		return;
 	}
 	// The proper way would be to pipe this through a parser, but with less than
@@ -97,7 +98,7 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 		talks = talks.concat(dayTalks);
 		done();
 	});
-}, function done () {
+}, function allDone () {
 	var interpreters = __(times).map(function (time, name) {
 		return { name: name, time: time };
 	})
