@@ -91,7 +91,7 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 					coverage.other.EN_DE++;
 				}
 				if (otherLang) {
-					coverage.main.other++;
+					coverage.other.other++;
 				}
 			}
 		});
