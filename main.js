@@ -98,7 +98,7 @@ async.eachLimit(files, 5, function iterator (filename, done) {
 		talks = talks.concat(dayTalks);
 		done();
 	});
-}, function allDone () {
+}).then(function () {
 	var interpreters = __(times).map(function (time, name) {
 		return { name: name, time: time };
 	})
