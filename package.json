@@ -4,13 +4,16 @@
   "description": "Parses the 31c3 translation schedule and counts the hours everyone has worked.",
   "main": "main.js",
   "scripts": {
+    "start": "NODE_ENV=production ts-node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "pbock",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/marked": "^3.0.1",
     "async": "^3.2.2",
     "lodash": "^4.17.21",
-    "markdown-to-txt": "^2.0.0"
+    "marked": "^3.0.8"
   }
 }
